@@ -9,30 +9,6 @@
         "singleQuote": false,
         "bracketSpacing": false
       }
-    },
-    {
-      "files": "*.yml",
-      "options": {}
-    },
-    {
-      "files": "*.yaml",
-      "options": {}
-    },
-    {
-      "files": "*.toml",
-      "options": {}
-    },
-    {
-      "files": "*.json",
-      "options": {}
-    },
-    {
-      "files": "*.js",
-      "options": {}
-    },
-    {
-      "files": "*.ts",
-      "options": {}
     }
   ]
 }
