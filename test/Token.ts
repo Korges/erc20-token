@@ -70,6 +70,23 @@ describe("Token", function () {
     });
   });
 
+  describe("events", function () {
+    const amount = ethers.parseEther("100");
+
+    it("should emit Transfer event", async function () {
+      const [from, to] = await ethers.getSigners();
+      await expect(token.transfer(to.address, amount))
+        .to.emit(token, "Transfer")
+        .withArgs(from.address, to.address, amount);
+    });
+    it("should emit Approval event", async function () {
+      const [owner, spender] = await ethers.getSigners();
+      await expect(token.approve(spender.address, amount))
+        .to.emit(token, "Approval")
+        .withArgs(owner.address, spender.address, amount);
+    });
+  });
+
   describe("claim", async function () {
     let account0: HardhatEthersSigner;
 
