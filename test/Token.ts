@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import { network } from "hardhat";
-import type { MyToken } from "../types/ethers-contracts/index.js";
+import type { MyToken } from "../types/ethers-contracts/index.ts";
+import type { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/types";
 
 const { ethers } = await network.connect();
 
@@ -25,13 +26,13 @@ describe("Token", function () {
     it("should have MTK symbol", async function () {
       expect(await token.symbol()).to.eq("MTK");
     });
-    it("should have a total supply of 100,000", async function () {
-      expect(await token.totalSupply()).to.eq(ethers.parseEther("100000"));
+    it("should have a total supply of 1000", async function () {
+      expect(await token.totalSupply()).to.eq(ethers.parseEther("1000"));
     });
     it("should mint total supply to deployer", async function () {
       const [deployer] = await ethers.getSigners();
       expect(await token.balanceOf(deployer.address)).to.eq(
-        ethers.parseEther("100000")
+        ethers.parseEther("1000")
       );
     });
   });
@@ -65,6 +66,39 @@ describe("Token", function () {
         token,
         [deployer, account0, account1],
         [0, -amount, amount]
+      );
+    });
+  });
+
+  describe("claim", async function () {
+    let account0: HardhatEthersSigner;
+
+    beforeEach(async function () {
+      [, account0] = await ethers.getSigners();
+    });
+
+    it("should allow user to claim tokens once", async function () {
+      await token.connect(account0).claim();
+
+      const balance = await token.balanceOf(account0.address);
+      expect(balance).to.equal(await token.CLAIM_AMOUNT());
+
+      const claimed = await token.claimedBy(account0.address);
+      expect(claimed).to.be.true;
+
+      const claimedSupply = await token.claimedSupply();
+      const circulatingSupply = await token.circulatingSupply();
+      expect(claimedSupply).to.equal(await token.CLAIM_AMOUNT());
+      expect(circulatingSupply).to.equal(
+        (await token.CLAIM_AMOUNT()) + (await token.OWNER_SUPPLY())
+      );
+    });
+
+    it("should revert if user tries to claim twice", async function () {
+      await token.connect(account0).claim();
+
+      await expect(token.connect(account0).claim()).to.be.revertedWith(
+        "Already claimed"
       );
     });
   });
